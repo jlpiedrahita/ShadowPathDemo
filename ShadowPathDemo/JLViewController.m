@@ -15,49 +15,32 @@
 {
     [super viewDidLoad];
 	
-	CALayer *frameLayer = [self frameLayer];
-	CALayer *imageLayer = [self imageLayerFromFrameLayer:frameLayer];
-	[frameLayer addSublayer:imageLayer];
-	
-	[self.view.layer addSublayer:frameLayer];
-}
-
-- (CALayer *)frameLayer
-{
-	const CGFloat kVerticalMargin = 100.f;
 	const CGFloat kHorizontalMargin = 20.f;
-	
-    CALayer *frameLayer = [CALayer layer];
-	frameLayer.bounds = CGRectInset(self.view.bounds, kHorizontalMargin, kVerticalMargin);
-	frameLayer.position = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
-	frameLayer.backgroundColor = [UIColor whiteColor].CGColor;
-	frameLayer.shadowOffset = CGSizeMake(0, 4);
-	frameLayer.shadowOpacity = .5;
-	frameLayer.shadowPath = [self shadowPathForFrameLayer:frameLayer];
-    return frameLayer;
-}
-
-- (CALayer *)imageLayerFromFrameLayer:(CALayer*) frameLayer
-{
-	const CGFloat kFrameMargin = 20.f;
+	const CGFloat kVerticalMargin = 100.f;
 	
 	CALayer *imageLayer = [CALayer layer];
-	imageLayer.position = frameLayer.position;
-	imageLayer.bounds = CGRectInset(frameLayer.bounds, kFrameMargin, kFrameMargin);
+	imageLayer.position = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+	imageLayer.bounds = CGRectInset(self.view.bounds, kHorizontalMargin, kVerticalMargin);
 	imageLayer.contents = (id)[UIImage imageNamed:@"image.jpg"].CGImage;
-	return imageLayer;
+	imageLayer.borderWidth = 20;
+	imageLayer.borderColor = [UIColor whiteColor].CGColor;
+	imageLayer.shadowPath = [self customShadowPathForRect:imageLayer.bounds];
+	imageLayer.shadowOffset = CGSizeMake(0, 4);
+	imageLayer.shadowOpacity = .5;
+	
+	[self.view.layer addSublayer:imageLayer];
 }
 
-- (CGPathRef)shadowPathForFrameLayer:(CALayer *)frameLayer
+- (CGPathRef)customShadowPathForRect:(CGRect)rect
 {
-	const CGFloat kMaxYShadowOffset = 20.f;
-
+	const CGFloat kCurveSlope = 20.f;
+	
 	UIBezierPath *shadowPath = [UIBezierPath bezierPath];
-	[shadowPath moveToPoint:CGPointMake(CGRectGetMinX(frameLayer.bounds), CGRectGetMinY(frameLayer.bounds))];
-	[shadowPath addLineToPoint:CGPointMake(CGRectGetMinX(frameLayer.bounds), CGRectGetMaxY(frameLayer.bounds) + kMaxYShadowOffset)];
-	[shadowPath addQuadCurveToPoint:CGPointMake(CGRectGetMaxX(frameLayer.bounds), CGRectGetMaxY(frameLayer.bounds) + kMaxYShadowOffset)
-					   controlPoint:CGPointMake(CGRectGetMidX(frameLayer.bounds), CGRectGetMaxY(frameLayer.bounds) - 10)];
-	[shadowPath addLineToPoint:CGPointMake(CGRectGetMaxX(frameLayer.bounds), CGRectGetMinY(frameLayer.bounds))];
+	[shadowPath moveToPoint:CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect))];
+	[shadowPath addLineToPoint:CGPointMake(CGRectGetMinX(rect), CGRectGetMaxY(rect) + kCurveSlope)];
+	[shadowPath addQuadCurveToPoint:CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect) + kCurveSlope)
+					   controlPoint:CGPointMake(CGRectGetMidX(rect), CGRectGetMaxY(rect) - kCurveSlope)];
+	[shadowPath addLineToPoint:CGPointMake(CGRectGetMaxX(rect), CGRectGetMinY(rect))];
 	[shadowPath closePath];
 	return shadowPath.CGPath;
 }
